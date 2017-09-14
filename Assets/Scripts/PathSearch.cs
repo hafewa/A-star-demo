@@ -7,50 +7,33 @@ namespace PathSearch
     {
         public class Point : IComparable<Point>
         {
+            public Point Parent { get; set; } // 本节点是由哪个父节点到达的.
+            public bool CanPass = true; // 本节点是否能够通过
+            // 坐标
+            public int X { get; set; }
+            public int Y { get; set; }
+
+            // 从初始点到本点时的实际代价
+            public int G { get; set; }
+            // 从本点到目标点的最佳路径的估计代价
+            public int H { get; private set; }
             // 从开始点, 经由N点(即本点)到目标点的估计代价
             public int F
             {
-                get { return g + h; }
-            }
-            // 从初始点到本点时的实际代价
-            private int g;
-            public int G
-            {
-                get { return g; }
-                set { g = value; }
-            }
-            // 从本点到目标点的最佳路径的估计代价
-            private int h;
-            public int H
-            {
-                get { return h; }
-            }
-
-            public Point Parent { get; set; }
-            public bool CanPass = true;
-
-            private int x;
-            public int X
-            {
-                get { return x; }
-            }
-
-            private int y;
-            public int Y
-            {
-                get { return y; }
+                get { return G + H; }
             }
 
             public Point(int x, int y)
             {
-                this.x = x;
-                this.y = y;
+                X = x;
+                Y = y;
             }
 
-            public Point (int x, int y, bool canPass): this(x, y)
+            public Point(int x, int y, bool canPass) : this(x, y)
             {
-                this.CanPass = canPass;
+                CanPass = canPass;
             }
+
 
             /// <summary>
             /// 计算本点和目标点之间的曼哈顿距离
@@ -59,7 +42,7 @@ namespace PathSearch
             /// <returns></returns>
             private int ManhattanDistance(Point target)
             {
-                return Math.Abs(target.x - this.x) + Math.Abs(target.y - this.y);
+                return Math.Abs(target.X - X) + Math.Abs(target.Y - Y);
             }
 
             /// <summary>
@@ -69,7 +52,7 @@ namespace PathSearch
             /// <returns></returns>
             private int EuclideanDistance(Point target, bool useSqrt = false)
             {
-                int distance = (int)(Math.Pow(target.x - this.x, 2.0) + Math.Pow(target.y - this.y,  2.0));
+                int distance = (int)(Math.Pow(target.X - X, 2.0) + Math.Pow(target.Y - Y,  2.0));
                 if (useSqrt)
                 {
                     distance = (int)Math.Sqrt(distance);
@@ -85,9 +68,9 @@ namespace PathSearch
             /// <returns></returns>
             public int CalculateF(Point startPoint, Point endPoint)
             {
-                g = ManhattanDistance(startPoint);
-                h = EuclideanDistance(endPoint);
-                return g + h;
+                G = ManhattanDistance(startPoint);
+                H = EuclideanDistance(endPoint);
+                return G + H;
             }
 
             /// <summary>
@@ -97,11 +80,11 @@ namespace PathSearch
             /// <returns></returns>
             public int CompareTo(Point other)
             {
-                if (this.F > other.F)
+                if (F > other.F)
                 {
                     return 1;
                 }
-                else if (this.F < other.F)
+                else if (F < other.F)
                 {
                     return -1;
                 }
@@ -123,7 +106,7 @@ namespace PathSearch
                 {
                     return base.Equals(obj);
                 }
-                if (x == other.x && y == other.y)
+                if (X == other.X && Y == other.Y)
                 {
                     return true;
                 }
@@ -134,12 +117,16 @@ namespace PathSearch
             }
 
             /// <summary>
-            /// 为了vs不报警告加上的, 无实际意义
+            /// 重新Hashcode方法
             /// </summary>
             /// <returns></returns>
             public override int GetHashCode()
             {
-                return base.GetHashCode();
+                int prime = 13;
+                int result = 1;
+                result = prime * result + X;
+                result = prime * result + Y;
+                return result;
             }
         } // end class
 
